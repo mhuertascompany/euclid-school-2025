@@ -90,12 +90,8 @@ Y1/notebooks/zoo-data/
 
 ### Easiest (works on both local & Colab)
 
-Paste the **bootstrap cell** (see the top of this README) as the **first cell** of your notebook.
-It will:
+Rune the **first cell** of your notebook, whcih should download the data to the correct location for everything to work.
 
-* ensure you’re inside `Y1/notebooks/`,
-* download the ZIP from **[https://astdp.net/euclid-zoo-data](https://astdp.net/euclid-zoo-data)**,
-* unzip to `./zoo-data/` (next to the notebook).
 
 ### Local manual download (alternative)
 
@@ -185,45 +181,6 @@ If you can’t (or don’t want to) set up locally:
 
 > Colab already ships with PyTorch + CUDA. Avoid reinstalling `torch/torchvision/torchaudio` unless you know why.
 
----
 
-## 🧪 Maintainers: generating lockfiles
-
-```bash
-# macOS (MPS)
-conda-lock lock -f env/environment-mac.yml -p osx-arm64 \
-  && mv conda-osx-arm64.lock.yml env/conda-osx-arm64.lock.yml
-
-# Linux CUDA 12.1
-conda-lock lock -f env/environment-linux-cuda.yml -p linux-64 \
-  && mv conda-linux-64.lock.yml env/conda-linux-64-cuda.lock.yml
-
-# Linux CPU
-conda-lock lock -f env/environment-linux-cpu.yml -p linux-64 \
-  && mv conda-linux-64.lock.yml env/conda-linux-64-cpu.lock.yml
-
-# Windows CUDA 12.1
-conda-lock lock -f env/environment-win-cuda.yml -p win-64 \
-  && mv conda-win-64.lock.yml env/conda-win-64-cuda.lock.yml
-
-# Windows CPU
-conda-lock lock -f env/environment-win-cpu.yml -p win-64 \
-  && mv conda-win-64.lock.yml env/conda-win-64-cpu.lock.yml
-```
-
----
-
-## 🆘 Troubleshooting
-
-* **Win-64 solve fails:** use the correct **CPU vs CUDA** lockfile; CUDA requires NVIDIA drivers.
-* **macOS (MPS) op missing (e.g., bicubic)**: add
-
-  ```python
-  import os; os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
-  ```
-
-  at the top of the notebook.
-* **Dataset not found:** run the bootstrap cell (or follow the manual ZIP steps) so that `Y1/notebooks/zoo-data/` exists with `train/` and `test/`.
-* Still stuck? Open a GitHub issue with OS, GPU, chosen lockfile, and the verification snippet output.
 
 
