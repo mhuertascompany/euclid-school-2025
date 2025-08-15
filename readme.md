@@ -12,7 +12,7 @@ We support:
 
 ---
 
-## 🔢 What you need
+## 🔢 Requirements
 
 - **Git**
 - **micromamba** (recommended) or **conda**
@@ -22,7 +22,7 @@ We support:
 
 ## 🧰 Choose an environment (lockfiles)
 
-We ship platform-specific lockfiles in `env/`:
+Use the per-platform lockfiles in `env/`:
 
 | OS | GPU? | Lockfile |
 |---|---|---|
@@ -32,13 +32,198 @@ We ship platform-specific lockfiles in `env/`:
 | Windows (x86_64) | **CUDA** | `env/conda-win-64-cuda.lock.yml` |
 | Windows (x86_64) | **CPU-only** | `env/conda-win-64-cpu.lock.yml` |
 
-> Maintainers: the YAMLs used to produce those lockfiles live in `env/environment-*.yml`.
+> Maintainers: YAMLs that produce these are under `env/environment-*.yml`.
 
 ---
 
 ## 🚀 Install from a lockfile
 
-> **micromamba (recommended):**
+**micromamba (recommended)**
 ```bash
 micromamba create -n euclid -f env/<chosen-lockfile>
 micromamba activate euclid
+````
+
+**conda**
+
+```bash
+pip install conda-lock
+conda-lock install -n euclid env/<chosen-lockfile>
+conda activate euclid
+```
+
+Verify:
+
+```bash
+python - << 'PY'
+import torch, sys
+print("python:", sys.version.split()[0])
+print("torch:", torch.__version__)
+print("CUDA available:", torch.cuda.is_available())
+print("MPS available:", getattr(torch.backends, "mps", None) and torch.backends.mps.is_available())
+PY
+```
+
+Launch:
+
+```bash
+jupyter lab    # or: jupyter notebook
+```
+
+> **macOS MPS note:** put this at the *top* of GPU notebooks to gracefully fall back to CPU for a few missing MPS ops:
+>
+> ```python
+> import os; os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+> ```
+
+---
+
+## 💾 Getting the data (`zoo-data`) — **ZIP download**
+
+All notebooks that use the dataset live under **`Y1/notebooks/`** and expect a local folder:
+
+```
+Y1/notebooks/zoo-data/
+  train/<class>/*
+  test/<class>/*
+```
+
+### Easiest (works on both local & Colab)
+
+Paste the **bootstrap cell** (see the top of this README) as the **first cell** of your notebook.
+It will:
+
+* ensure you’re inside `Y1/notebooks/`,
+* download the ZIP from **[https://astdp.net/euclid-zoo-data](https://astdp.net/euclid-zoo-data)**,
+* unzip to `./zoo-data/` (next to the notebook).
+
+### Local manual download (alternative)
+
+```bash
+cd euclid-school-2025/Y1/notebooks
+curl -L -o euclid-zoo-data.zip https://astdp.net/euclid-zoo-data
+unzip -q euclid-zoo-data.zip
+# You should now have: Y1/notebooks/zoo-data/train/... and /test/...
+```
+
+---
+
+## 🖥️ NVIDIA GPU drivers (Linux/Windows, CUDA path only)
+
+### Check
+
+**Windows**
+
+```powershell
+nvidia-smi   # should print a table with Driver Version & CUDA Version
+```
+
+**Linux**
+
+```bash
+lspci | grep -i nvidia
+nvidia-smi
+```
+
+### Install / Update
+
+**Windows (GeForce / RTX):**
+
+* Download the latest **Game Ready** or **Studio** driver from NVIDIA and install → **reboot** → run `nvidia-smi`.
+
+**Ubuntu/Debian:**
+
+```bash
+ubuntu-drivers devices
+sudo ubuntu-drivers autoinstall
+sudo reboot
+```
+
+**Fedora:**
+
+```bash
+sudo dnf install \
+  https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+  https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+sudo dnf install akmod-nvidia xorg-x11-drv-nvidia-cuda
+sudo reboot
+```
+
+**Arch:**
+
+```bash
+sudo pacman -Syu nvidia nvidia-utils
+sudo reboot
+```
+
+Verify:
+
+```bash
+nvidia-smi
+python - << 'PY'
+import torch
+print("CUDA available:", torch.cuda.is_available())
+print("Device:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU")
+PY
+```
+
+---
+
+## ☁️ Google Colab option
+
+If you can’t (or don’t want to) set up locally:
+
+1. Open [colab.research.google.com](https://colab.research.google.com) → **GitHub** tab → paste:
+
+   ```
+   https://github.com/mhuertascompany/euclid-school-2025
+   ```
+2. Pick a notebook.
+3. Runtime → **Change runtime type** → Hardware accelerator: **GPU** → Save.
+4. Paste the **bootstrap cell** (first cell) and run it.
+   It will cd into `Y1/notebooks/`, install minimal deps, download the ZIP, unzip to `./zoo-data/`, and show the device.
+
+> Colab already ships with PyTorch + CUDA. Avoid reinstalling `torch/torchvision/torchaudio` unless you know why.
+
+---
+
+## 🧪 Maintainers: generating lockfiles
+
+```bash
+# macOS (MPS)
+conda-lock lock -f env/environment-mac.yml -p osx-arm64 \
+  && mv conda-osx-arm64.lock.yml env/conda-osx-arm64.lock.yml
+
+# Linux CUDA 12.1
+conda-lock lock -f env/environment-linux-cuda.yml -p linux-64 \
+  && mv conda-linux-64.lock.yml env/conda-linux-64-cuda.lock.yml
+
+# Linux CPU
+conda-lock lock -f env/environment-linux-cpu.yml -p linux-64 \
+  && mv conda-linux-64.lock.yml env/conda-linux-64-cpu.lock.yml
+
+# Windows CUDA 12.1
+conda-lock lock -f env/environment-win-cuda.yml -p win-64 \
+  && mv conda-win-64.lock.yml env/conda-win-64-cuda.lock.yml
+
+# Windows CPU
+conda-lock lock -f env/environment-win-cpu.yml -p win-64 \
+  && mv conda-win-64.lock.yml env/conda-win-64-cpu.lock.yml
+```
+
+---
+
+## 🆘 Troubleshooting
+
+* **Win-64 solve fails:** use the correct **CPU vs CUDA** lockfile; CUDA requires NVIDIA drivers.
+* **macOS (MPS) op missing (e.g., bicubic)**: add
+
+  ```python
+  import os; os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+  ```
+
+  at the top of the notebook.
+* **Dataset not found:** run the bootstrap cell (or follow the manual ZIP steps) so that `Y1/notebooks/zoo-data/` exists with `train/` and `test/`.
+* Still stuck? Open a GitHub issue with OS, GPU, chosen lockfile, and the verification snippet output.
+
+
