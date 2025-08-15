@@ -1,150 +1,44 @@
-ressources for the 2025 edition of the Euclid France School
+# EUCLID School 2025 — Notebooks & Environment
 
-# Environment setup (conda-lock, fully pinned)
+This repo contains the notebooks and data used in the EUCLID School 2025 lectures and labs.
 
-We provide **platform-specific lockfiles** so you can reproduce the exact environment we used for the notebooks.
+We support:
 
-## 0) Prereqs
+- **Local installs** with **fully pinned conda-lock lockfiles**
+  - macOS (Apple Silicon / MPS)
+  - Linux (CUDA **or** CPU-only)
+  - Windows (CUDA **or** CPU-only)
+- A **Google Colab** option with a ready-to-use **bootstrap cell**
 
-* **Git**
-* One of:
+---
 
-  * **micromamba** (recommended; fastest), or
-  * **conda/mamba** (works too)
+## 🔢 What you need
 
-### Install micromamba (recommended)
+- **Git**
+- **micromamba** (recommended) or **conda**
+- If you want **GPU** on Linux/Windows: an **NVIDIA GPU + drivers** (see below)
 
-* **macOS / Linux (bash/zsh):**
+---
 
-  ```bash
-  /bin/bash -c "$(curl -L micro.mamba.pm/install.sh)"
-  micromamba shell init -s bash -y   # or zsh/fish, etc.
-  exec $SHELL
-  ```
-* **Windows (PowerShell):**
+## 🧰 Choose an environment (lockfiles)
 
-  ```powershell
-  irm https://micro.mamba.pm/install.ps1 | iex
-  micromamba shell init -s powershell -y
-  # Close & reopen the terminal after this step
-  ```
+We ship platform-specific lockfiles in `env/`:
 
-## 1) Clone the repo
+| OS | GPU? | Lockfile |
+|---|---|---|
+| macOS (Apple Silicon) | MPS (Apple GPU) | `env/conda-osx-arm64.lock.yml` |
+| Linux (x86_64) | **CUDA** | `env/conda-linux-64-cuda.lock.yml` |
+| Linux (x86_64) | **CPU-only** | `env/conda-linux-64-cpu.lock.yml` |
+| Windows (x86_64) | **CUDA** | `env/conda-win-64-cuda.lock.yml` |
+| Windows (x86_64) | **CPU-only** | `env/conda-win-64-cpu.lock.yml` |
 
+> Maintainers: the YAMLs used to produce those lockfiles live in `env/environment-*.yml`.
+
+---
+
+## 🚀 Install from a lockfile
+
+> **micromamba (recommended):**
 ```bash
-git clone https://github.com/mhuertascompany/euclid-school-2025.git
-cd euclid-school-2025
-```
-
-## 2) Create the environment from the lockfile (choose your platform)
-
-> If you installed **micromamba**, use the first command in each block.
-> If you only have **conda**, use the “conda-lock install” variant.
-
-### macOS (Apple Silicon, arm64)
-
-```bash
-# micromamba
-micromamba create -n euclid -f env/conda-osx-arm64.lock.yml
-
-# OR conda
-pip install conda-lock
-conda-lock install -n euclid env/conda-osx-arm64.lock.yml
-```
-
-### Linux (x86\_64)
-
-```bash
-# micromamba
-micromamba create -n euclid -f env/conda-linux-64.lock.yml
-
-# OR conda
-pip install conda-lock
-conda-lock install -n euclid env/conda-linux-64.lock.yml
-```
-
-### Windows (x86\_64; run in “Anaconda Prompt” or PowerShell)
-
-```powershell
-# micromamba
-micromamba create -n euclid -f env/conda-win-64.lock.yml
-
-# OR conda
-pip install conda-lock
-conda-lock install -n euclid env/conda-win-64.lock.yml
-```
-
-## 3) Activate the environment
-
-```bash
-# micromamba
+micromamba create -n euclid -f env/<chosen-lockfile>
 micromamba activate euclid
-
-# OR conda
-conda activate euclid
-```
-
-## 4) Verify PyTorch device & launch notebooks
-
-```bash
-python - << 'PY'
-import torch, sys
-print("python:", sys.version.split()[0])
-print("torch:", torch.__version__)
-print("CUDA available:", torch.cuda.is_available())
-print("MPS available:", getattr(torch.backends, "mps", None) and torch.backends.mps.is_available())
-PY
-```
-
-Launch Jupyter:
-
-```bash
-jupyter lab
-# or: jupyter notebook
-```
-
-> Tip (Jupyter kernel): launching Jupyter **from inside** the environment is enough.
-> If you prefer selecting kernels, you can also run:
->
-> ```bash
-> python -m ipykernel install --user --name euclid --display-name "euclid (conda)"
-> ```
-
----
-
-## Notes for Mac (Apple Silicon, MPS)
-
-* Some models (e.g., certain ViT variants) call **bicubic** interpolation, which is not implemented on MPS in some PyTorch builds. Two workarounds:
-
-  1. Add this at the **top of a notebook (first cell, before `import torch`)**:
-
-     ```python
-     import os; os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
-     ```
-
-     This keeps most ops on GPU and falls back to CPU only for the missing ones.
-  2. If a specific model still errors, the notebook may include a small **monkey-patch** to switch bicubic → bilinear for positional embedding interpolation.
-
----
-
-## Common pitfalls / troubleshooting
-
-* **Wrong lockfile / architecture**
-  Apple Silicon users: use `conda-osx-arm64.lock.yml`.
-  Intel Macs: use an **osx-64** lockfile (if provided), otherwise install via conda from `environment.yml`.
-
-* **Windows Antivirus / long paths**
-  If installs fail, try running as Admin, shorten the path (e.g., `C:\envs\euclid`), or exclude the env folder in AV.
-
-* **Proxy / corporate networks**
-  You may need to set `HTTP_PROXY`/`HTTPS_PROXY` env vars for package downloads.
-
-* **Outdated conda/mamba**
-  Update your solver if environment creation is slow or fails to resolve:
-
-  ```bash
-  conda update -n base -c conda-forge conda
-  # or install micromamba (faster)
-  ```
-
-
