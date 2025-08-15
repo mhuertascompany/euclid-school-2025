@@ -2,13 +2,13 @@
 
 This repo contains the notebooks and data used in the EUCLID School 2025 lectures and labs.
 
-We support:
+Supported options:
 
 - **Local installs** with **fully pinned conda-lock lockfiles**
   - macOS (Apple Silicon / MPS)
   - Linux (CUDA **or** CPU-only)
   - Windows (CUDA **or** CPU-only)
-- A **Google Colab** option with a ready-to-use **bootstrap cell**
+- A **Google Colab** option with a ready-to-use **bootstrap cell** (see bottom of this readme)
 
 ---
 
