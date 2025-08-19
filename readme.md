@@ -185,7 +185,7 @@ PY
 > If CUDA isn’t detected, double-check drivers and that you used the **CUDA wheel** (`+cu121` and the `--index-url`).
 
 ---
-
+````
 
 ## ☁️ Google Colab option
 
