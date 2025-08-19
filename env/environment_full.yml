@@ -1,4 +1,4 @@
-name: euclid-school
+name: euclid-school-ml
 channels:
   - conda-forge
 dependencies:

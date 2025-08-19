@@ -50,7 +50,7 @@ This uses **`environment_full.yml`** (includes locked versions and a `pip:` bloc
 ```bash
 # If libmamba solver gives you grief, prepend CONDA_SOLVER=classic
 conda env create -f env/environment_full.yml
-conda activate euclid-school
+conda activate euclid-school-ml
 ```
 
 > Tip: If you edit the file later, update the env with:
@@ -82,7 +82,7 @@ PY
 If you prefer a lighter spec, add a **`environment.yml`** to env/ with:
 
 ```yaml
-name: euclid-school
+name: euclid-school-ml
 channels:
   - conda-forge
 dependencies:
@@ -109,7 +109,7 @@ Then:
 
 ```bash
 conda env create -f env/environment.yml
-conda activate euclid-school
+conda activate euclid-school-ml
 ```
 
 > **Why PyTorch via pip?** It’s the most portable across macOS/Linux/Windows for this course. macOS users get Apple **MPS** automatically; Linux/Windows users can swap to CUDA wheels (below).
@@ -119,7 +119,7 @@ conda activate euclid-school
 ## 3) Register the Jupyter kernel
 
 ```bash
-python -m ipykernel install --user --name euclid-school --display-name "Python (euclid-school)"
+python -m ipykernel install --user --name euclid-school --display-name "Python (euclid-school-ml)"
 ```
 
 Then open Jupyter Lab and pick **Python (euclid-school)** as the kernel:
