@@ -2,168 +2,190 @@
 
 This repo contains the notebooks and data used in the EUCLID School 2025 lectures and labs.
 
-Supported options:
 
-- **Local installs** with **fully pinned conda-lock lockfiles**
-  - macOS (Apple Silicon / MPS)
-  - Linux (CUDA **or** CPU-only)
-  - Windows (CUDA **or** CPU-only)
-- A **Google Colab** option with a ready-to-use **bootstrap cell** (see bottom of this readme)
+# 🔧 Setup: Euclid School 2025
 
----
+These notebooks are tested with **conda** (Miniforge / Mambaforge recommended).
+You have two ways to install:
 
-## 🔢 Requirements
+* **Recommended**: use the exact, reproducible environment from `environment-full.yml`.
+* **Alternative**: use a minimal `environment.yml` (lighter solve, but a bit less pinned).
 
-- **Git**
-- **micromamba** (recommended) or **conda**
-- If you want **GPU** on Linux/Windows: an **NVIDIA GPU + drivers** (see below)
+> **OS support**: macOS (Apple Silicon), Linux, Windows.
+> **GPU**: macOS uses Apple **MPS** automatically. Linux/Windows users with NVIDIA GPUs can install **CUDA** wheels for PyTorch (see below).
 
 ---
 
-## 🧰 Choose an environment (lockfiles)
+## 0) Prerequisites
 
-Use the per-platform lockfiles in `env/`:
+* Install **Miniforge** (or Mambaforge): [https://conda-forge.org/miniforge/](https://conda-forge.org/miniforge/)
+* (Optional) Faster solver:
 
-| OS | GPU? | Lockfile |
-|---|---|---|
-| macOS (Apple Silicon) | MPS (Apple GPU) | `env/conda-osx-arm64.lock.yml` |
-| Linux (x86_64) | **CUDA** | `env/conda-linux-64-cuda.lock.yml` |
-| Linux (x86_64) | **CPU-only** | `env/conda-linux-64-cpu.lock.yml` |
-| Windows (x86_64) | **CUDA** | `env/conda-win-64-cuda.lock.yml` |
-| Windows (x86_64) | **CPU-only** | `env/conda-win-64-cpu.lock.yml` |
+  ```bash
+  conda config --set channel_priority flexible
+  conda config --set solver libmamba
+  ```
 
-> Maintainers: YAMLs that produce these are under `env/environment-*.yml`.
+  If you hit solver issues, switch temporarily to classic:
+
+  ```bash
+  CONDA_SOLVER=classic conda info  # just to confirm
+  ```
 
 ---
 
-## 🚀 Install from a lockfile
-
-**micromamba (recommended)**
-```bash
-micromamba create -n euclid -f env/<chosen-lockfile>
-micromamba activate euclid
-````
-
-**conda**
+## 1) Clone the repo
 
 ```bash
-pip install conda-lock
-conda-lock install -n euclid env/<chosen-lockfile>
-conda activate euclid
+git clone https://github.com/mhuertascompany/euclid-school-2025.git
+cd euclid-school-2025
 ```
 
-Verify:
+---
+
+## 2A) Create the environment (exact, reproducible)
+
+This uses **`environment-full.yml`** (includes locked versions and a `pip:` block for PyTorch 2.5.1 / torchvision 0.20.1 / torchaudio 2.5.1).
 
 ```bash
-python - << 'PY'
-import torch, sys
-print("python:", sys.version.split()[0])
-print("torch:", torch.__version__)
-print("CUDA available:", torch.cuda.is_available())
-print("MPS available:", getattr(torch.backends, "mps", None) and torch.backends.mps.is_available())
-PY
+# If libmamba solver gives you grief, prepend CONDA_SOLVER=classic
+conda env create -f environment-full.yml
+conda activate euclid-school
 ```
 
-Launch:
-
-```bash
-jupyter lab    # or: jupyter notebook
-```
-
-> **macOS MPS note:** put this at the *top* of GPU notebooks to gracefully fall back to CPU for a few missing MPS ops:
+> Tip: If you edit the file later, update the env with:
 >
-> ```python
-> import os; os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+> ```bash
+> conda env update -f environment-full.yml --prune
 > ```
 
----
-
-## 💾 Getting the data (`zoo-data`) — **ZIP download**
-
-All notebooks that use the dataset live under **`Y1/notebooks/`** and expect a local folder:
-
-```
-Y1/notebooks/zoo-data/
-  train/<class>/*
-  test/<class>/*
-```
-
-### Easiest (works on both local & Colab)
-
-Rune the **first cell** of your notebook, whcih should download the data to the correct location for everything to work.
-
-
-### Local manual download (alternative)
+### Verify the install
 
 ```bash
-cd euclid-school-2025/Y1/notebooks
-curl -L -o euclid-zoo-data.zip https://astdp.net/euclid-zoo-data
-unzip -q euclid-zoo-data.zip
-# You should now have: Y1/notebooks/zoo-data/train/... and /test/...
-```
-
----
-
-## 🖥️ NVIDIA GPU drivers (Linux/Windows, CUDA path only)
-
-### Check
-
-**Windows**
-
-```powershell
-nvidia-smi   # should print a table with Driver Version & CUDA Version
-```
-
-**Linux**
-
-```bash
-lspci | grep -i nvidia
-nvidia-smi
-```
-
-### Install / Update
-
-**Windows (GeForce / RTX):**
-
-* Download the latest **Game Ready** or **Studio** driver from NVIDIA and install → **reboot** → run `nvidia-smi`.
-
-**Ubuntu/Debian:**
-
-```bash
-ubuntu-drivers devices
-sudo ubuntu-drivers autoinstall
-sudo reboot
-```
-
-**Fedora:**
-
-```bash
-sudo dnf install \
-  https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
-  https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-sudo dnf install akmod-nvidia xorg-x11-drv-nvidia-cuda
-sudo reboot
-```
-
-**Arch:**
-
-```bash
-sudo pacman -Syu nvidia nvidia-utils
-sudo reboot
-```
-
-Verify:
-
-```bash
-nvidia-smi
-python - << 'PY'
-import torch
+python - <<'PY'
+import torch, sys
+def yes(x): 
+    return bool(x) if isinstance(x, (bool,int)) else bool(getattr(torch.backends, 'mps', None) and torch.backends.mps.is_available()) if x=='MPS' else False
+print("Python:", sys.version.split()[0])
+print("Torch:", torch.__version__)
 print("CUDA available:", torch.cuda.is_available())
-print("Device:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU")
+print("MPS available:", hasattr(torch.backends, 'mps') and torch.backends.mps.is_available())
+if torch.cuda.is_available():
+    print("CUDA device:", torch.cuda.get_device_name(0))
 PY
 ```
 
 ---
+
+## 2B) (Optional) Minimal environment
+
+If you prefer a lighter spec, add a **`environment.yml`** with:
+
+```yaml
+name: euclid-school
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - pandas
+  - scikit-learn=1.5.2
+  - matplotlib
+  - seaborn
+  - h5py
+  - pillow
+  - tqdm
+  - jupyterlab
+  - ipykernel
+  - pip
+  - pip:
+      - torch==2.5.1
+      - torchvision==0.20.1
+      - torchaudio==2.5.1
+```
+
+Then:
+
+```bash
+conda env create -f environment.yml
+conda activate euclid-school
+```
+
+> **Why PyTorch via pip?** It’s the most portable across macOS/Linux/Windows for this course. macOS users get Apple **MPS** automatically; Linux/Windows users can swap to CUDA wheels (below).
+
+---
+
+## 3) Register the Jupyter kernel
+
+```bash
+python -m ipykernel install --user --name euclid-school --display-name "Python (euclid-school)"
+```
+
+Then open Jupyter Lab and pick **Python (euclid-school)** as the kernel:
+
+```bash
+jupyter lab
+```
+
+---
+
+## 4) NVIDIA / CUDA (Linux & Windows)
+
+PyTorch in the YAML installs CPU (and MPS on macOS). If you have an NVIDIA GPU and drivers, you can switch to CUDA wheels **inside the same env**:
+
+1. **Check drivers first**
+
+   * **Windows**: open *Device Manager → Display adapters* → you should see *NVIDIA ...*. Or run **NVIDIA Control Panel**.
+
+   * **Linux**:
+
+     ```bash
+     nvidia-smi
+     ```
+
+     If it prints a table with driver & CUDA version, you’re good.
+
+   * If not installed:
+
+     * **Windows**: install the latest Game Ready/Studio Driver from NVIDIA.
+     * **Ubuntu**:
+
+       ```bash
+       sudo apt update
+       ubuntu-drivers devices
+       sudo ubuntu-drivers autoinstall
+       sudo reboot
+       ```
+
+2. **Install CUDA wheels for PyTorch** (example for CUDA 12.1):
+
+   ```bash
+   conda activate euclid-school
+   pip uninstall -y torch torchvision torchaudio
+   pip install --index-url https://download.pytorch.org/whl/cu121 \
+       torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121
+   ```
+
+3. **Verify CUDA**
+
+   ```bash
+   python - <<'PY'
+   ```
+
+import torch
+print("Torch:", torch.**version**)
+print("CUDA available:", torch.cuda.is\_available())
+if torch.cuda.is\_available():
+print("CUDA device:", torch.cuda.get\_device\_name(0))
+PY
+
+````
+
+> If CUDA isn’t detected, double-check drivers and that you used the **CUDA wheel** (`+cu121` and the `--index-url`).
+
+---
+
 
 ## ☁️ Google Colab option
 

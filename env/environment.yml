@@ -1,0 +1,16 @@
+name: euclid-school
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - h5py
+  - ipykernel
+  - jupyterlab
+  - matplotlib
+  - numpy
+  - pandas
+  - pillow
+  - scikit-learn=1.5.2
+  - scipy
+  - seaborn
+  - tqdm
