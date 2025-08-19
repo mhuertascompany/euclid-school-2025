@@ -53,12 +53,6 @@ conda env create -f env/environment_full.yml
 conda activate euclid-school-ml
 ```
 
-> Tip: If you edit the file later, update the env with:
->
-> ```bash
-> conda env update -f env/environment_full.yml --prune
-> ```
-
 ### Verify the install
 
 ```bash
