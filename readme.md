@@ -49,14 +49,14 @@ This uses **`environment-full.yml`** (includes locked versions and a `pip:` bloc
 
 ```bash
 # If libmamba solver gives you grief, prepend CONDA_SOLVER=classic
-conda env create -f environment-full.yml
+conda env create -f env/environment-full.yml
 conda activate euclid-school
 ```
 
 > Tip: If you edit the file later, update the env with:
 >
 > ```bash
-> conda env update -f environment-full.yml --prune
+> conda env update -f env/environment-full.yml --prune
 > ```
 
 ### Verify the install
@@ -79,7 +79,7 @@ PY
 
 ## 2B) (Optional) Minimal environment
 
-If you prefer a lighter spec, add a **`environment.yml`** with:
+If you prefer a lighter spec, add a **`environment.yml`** to env/ with:
 
 ```yaml
 name: euclid-school
@@ -108,7 +108,7 @@ dependencies:
 Then:
 
 ```bash
-conda env create -f environment.yml
+conda env create -f env/environment.yml
 conda activate euclid-school
 ```
 
