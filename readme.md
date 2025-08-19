@@ -3,7 +3,7 @@
 This repo contains the notebooks and data used in the EUCLID School 2025 lectures and labs.
 
 
-# 🔧 Setup: Euclid School 2025
+# 🔧 Setup: Euclid School 2025 (if you prefer to run on colab, skip)
 
 These notebooks are tested with **conda** (Miniforge / Mambaforge recommended).
 You have two ways to install:
@@ -45,18 +45,18 @@ cd euclid-school-2025
 
 ## 2A) Create the environment (exact, reproducible)
 
-This uses **`environment-full.yml`** (includes locked versions and a `pip:` block for PyTorch 2.5.1 / torchvision 0.20.1 / torchaudio 2.5.1).
+This uses **`environment_full.yml`** (includes locked versions and a `pip:` block for PyTorch 2.5.1 / torchvision 0.20.1 / torchaudio 2.5.1).
 
 ```bash
 # If libmamba solver gives you grief, prepend CONDA_SOLVER=classic
-conda env create -f env/environment-full.yml
+conda env create -f env/environment_full.yml
 conda activate euclid-school
 ```
 
 > Tip: If you edit the file later, update the env with:
 >
 > ```bash
-> conda env update -f env/environment-full.yml --prune
+> conda env update -f env/environment_full.yml --prune
 > ```
 
 ### Verify the install
@@ -198,8 +198,7 @@ If you can’t (or don’t want to) set up locally:
    ```
 2. Pick a notebook.
 3. Runtime → **Change runtime type** → Hardware accelerator: **GPU** → Save.
-4. Paste the **bootstrap cell** (first cell) and run it.
-   It will cd into `Y1/notebooks/`, install minimal deps, download the ZIP, unzip to `./zoo-data/`, and show the device.
+4. The first cell will cd into `Y1/notebooks/`, install minimal deps, download the ZIP, unzip to `./zoo-data/`, and show the device.
 
 > Colab already ships with PyTorch + CUDA. Avoid reinstalling `torch/torchvision/torchaudio` unless you know why.
 
