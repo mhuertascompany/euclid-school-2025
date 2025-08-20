@@ -109,7 +109,7 @@ conda activate euclid-school-ml
 ## 3) Installing ili (for Y2 - last notebook only)
 
 
-# Clone and install in editable mode
+**Clone and install in editable mode**
 git clone https://github.com/maho3/ltu-ili.git external/ltu-ili
 conda activate euclid-school
 pip install -e external/ltu-ili
