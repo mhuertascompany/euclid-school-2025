@@ -106,23 +106,19 @@ conda env create -f env/environment.yml
 conda activate euclid-school-ml
 ```
 
-> **Why PyTorch via pip?** It’s the most portable across macOS/Linux/Windows for this course. macOS users get Apple **MPS** automatically; Linux/Windows users can swap to CUDA wheels (below).
+## 3) Installing ili (for Y2 - last notebook only)
 
----
 
-## 3) Register the Jupyter kernel
+# Clone and install in editable mode
+git clone https://github.com/maho3/ltu-ili.git external/ltu-ili
+conda activate euclid-school
+pip install -e external/ltu-ili
 
-```bash
-python -m ipykernel install --user --name euclid-school --display-name "Python (euclid-school-ml)"
-```
 
-Then open Jupyter Lab and pick **Python (euclid-school)** as the kernel:
+Verify:
 
-```bash
-jupyter lab
-```
+python -c "import ili; print('ili OK')"
 
----
 
 ## 4) NVIDIA / CUDA (Linux & Windows)
 
